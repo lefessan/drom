@@ -56,9 +56,9 @@ let action ~args ~packages () =
     begin
       match !some_pinned with
       | [] -> ()
-      | packages -> Opam.run ~y [ "unpin" ] ("--no-action" :: packages)
+      | packages -> Run.opam ~y [ "unpin" ] ("--no-action" :: packages)
     end;
-    Opam.run ~y [ "pin" ] [ "--no-action"; "-k"; "path"; "." ];
+    Run.opam ~y [ "pin" ] [ "--no-action"; "-k"; "path"; "." ];
     List.iter
       (fun p ->
         let pin_dir = overlay_dir // p in
@@ -67,7 +67,7 @@ let action ~args ~packages () =
       packages
   end;
   let exn =
-    match Opam.run ~y [ "install" ] ("-y" :: packages) with
+    match Run.opam ~y [ "install" ] ("-y" :: packages) with
     | () -> None
     | exception exn -> Some exn
   in

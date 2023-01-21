@@ -18,13 +18,13 @@ let action ~args () =
   in
   let y = args.arg_yes in
 
-  Opam.run ~y [ "update" ] [];
-  Opam.run ~y:true [ "pin" ] [ "-k"; "path"; "--no-action"; "./_drom" ];
+  Run.opam ~y [ "update" ] [];
+  Run.opam ~y:true [ "pin" ] [ "-k"; "path"; "--no-action"; "./_drom" ];
   let deps_package = p.package.name ^ "-deps" in
-  Opam.run ~y [ "install" ] [ deps_package ];
+  Run.opam ~y [ "install" ] [ deps_package ];
   let error = ref None in
-  Opam.run ~y ~error [ "upgrade" ] [];
-  Opam.run ~error [ "unpin" ] [ "-y"; deps_package ];
+  Run.opam ~y ~error [ "upgrade" ] [];
+  Run.opam ~error [ "unpin" ] [ "-y"; deps_package ];
   match !error with
   | None -> Printf.eprintf "Switch Update OK\n%!"
   | Some exn -> raise exn

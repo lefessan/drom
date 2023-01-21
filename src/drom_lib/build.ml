@@ -162,7 +162,7 @@ let build ~args ?(setup_opam = true) ?(build_deps = true)
                  --switch"
             | Unix.S_LNK -> ()
             | _ -> Error.raise "Corrupted local switch '_opam'" ) );
-          Opam.run ~y ~switch ?edition [ "switch"; "link" ] [ switch ];
+          Run.opam ~y ~switch ?edition [ "switch"; "link" ] [ switch ];
           false
       in
 
@@ -170,7 +170,7 @@ let build ~args ?(setup_opam = true) ?(build_deps = true)
 
       ( match Unix.lstat "_opam" with
       | exception _ ->
-        Opam.run ~y:true [ "switch"; "create" ] [ "."; "--empty" ]
+        Run.opam ~y:true [ "switch"; "create" ] [ "."; "--empty" ]
       | st -> (
         let current_switch =
           match st.Unix.st_kind with
@@ -246,8 +246,8 @@ let build ~args ?(setup_opam = true) ?(build_deps = true)
         || config.config_auto_opam_yes <> Some false
            && is_local_directory "_opam"
       in
-      Opam.run ~y [ "install" ] [ ocaml_nv ];
-      Opam.run [ "switch"; "set-base" ] [ ocaml_nv ]
+      Run.opam ~y [ "install" ] [ ocaml_nv ];
+      Run.opam [ "switch"; "set-base" ] [ ocaml_nv ]
     | v -> (
       match edition with
       | Some edition ->
@@ -344,7 +344,7 @@ had_switch: %b
 
     Printf.eprintf "current dir: %s\n%!" (Sys.getcwd ());
 
-    Opam.run ~y [ "install" ]
+    Run.opam ~y [ "install" ]
       ( [ "--deps-only"; "." // tmp_opam_filename ]
       @ ( if need_dev_deps then
           [ "--with-doc"; "--with-test" ]
@@ -384,25 +384,21 @@ had_switch: %b
         extra_packages;
       match !to_install with
       | [] -> ()
-      | packages -> Opam.run ~y [ "install" ] packages )
+      | packages -> Run.opam ~y [ "install" ] packages )
   end;
 
   if build then begin
     Misc.before_hook "build";
-    Opam.run [ "exec" ]
-      ( [ "--"; "dune"; "build"; "@install" ]
-      @ ( match arg_profile with
-        | Some profile -> [ "--profile"; profile ]
-        | None -> (
-          match p.profile with
-          | None -> []
-          | Some profile -> [ "--profile"; profile ] ) )
-      @
-      match !Globals.verbosity with
-      | 0 -> [ "--display=quiet" ]
-      | 1 -> []
-      | 2 -> [ "--display=short" ]
-      | _ -> [ "--display=verbose" ] );
+    Run.dune
+      (
+       [ "build"; "@install" ]
+       @ ( match arg_profile with
+           | Some profile -> [ "--profile"; profile ]
+           | None -> (
+               match p.profile with
+               | None -> []
+               | Some profile -> [ "--profile"; profile ] ) )
+     );
     Misc.after_hook "build"
   end;
   p

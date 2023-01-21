@@ -11,8 +11,6 @@
 open EzCompat
 open Ez_opam_file.V1
 open Types
-open Ez_file.V1
-open EzFile.OP
 
 module OpamParser = struct
   module FullPos = struct
@@ -233,44 +231,3 @@ let opam_of_project kind package =
       []
     else
       [ s ] )
-
-let () = Unix.putenv "OPAMCLI" "2.0"
-
-let exec ?(y = false) cmd args =
-  Misc.call
-    (Array.of_list
-       ( [ "opam" ] @ cmd
-       @ ( if y then
-           [ "-y" ]
-         else
-           [] )
-       @ args ) )
-
-let init ?y ?switch ?edition () =
-  let opam_root = Globals.opam_root () in
-
-  if not (Sys.file_exists opam_root) then
-    let args =
-      match switch with
-      | None -> [ "--bare" ]
-      | Some switch -> [ "--comp"; switch ]
-    in
-    exec ?y [ "init" ] args
-  else
-    match switch with
-    | None -> ()
-    | Some switch ->
-      if Filename.is_relative switch then
-        if not (Sys.file_exists (opam_root // switch)) then
-          exec ?y [ "switch"; "create" ]
-            ( match edition with
-            | None -> [ switch ]
-            | Some edition -> [ switch; edition ] )
-
-let run ?y ?error ?switch ?edition cmd args =
-  init ?y ?switch ?edition ();
-  match error with
-  | None -> exec ?y cmd args
-  | Some error -> (
-    try exec ?y cmd args with
-    | exn -> error := Some exn )

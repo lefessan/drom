@@ -8,18 +8,15 @@
 (*                                                                        *)
 (**************************************************************************)
 
-open Ezcmd.V2
+(*
+val opam_raw : unit
+val opam_init : unit
+*)
+val opam :
+  ?y:bool ->
+  ?error:exn option ref ->
+  ?switch:string ->
+  ?edition:string -> string list -> string list -> unit
 
-let cmd_name = "uninstall"
-
-let action ~args () =
-  let _p = Build.build ~args () in
-  let packages = Misc.list_opam_packages "." in
-  Run.opam [ "remove" ] packages;
-  Run.opam [ "unpin" ] packages
-
-let cmd =
-  let args, specs = Build.build_args () in
-  EZCMD.sub cmd_name
-    (fun () -> action ~args ())
-    ~args:specs ~doc:"Uninstall the project from the project opam switch"
+(* Run "opam exec -- dune ARGS" with the given arguments *)
+val dune : string list -> unit
