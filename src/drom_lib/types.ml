@@ -170,6 +170,7 @@ type license =
 type share = {
   share_dir : string ;
   share_version : string ;
+  share_drom_version : string ;
   mutable share_licenses : license StringMap.t option ;
   mutable share_projects : skeleton StringMap.t option ;
   mutable share_packages : skeleton StringMap.t option ;

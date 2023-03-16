@@ -104,6 +104,16 @@ let update_files share ?args ?(git = false) ?(create = false) p =
          args.arg_promote_skip)
   in
 *)
+
+  if VersionCompare.compare share.share_drom_version
+      Version.version > 0 then begin
+    Printf.eprintf "Error: you cannot update this project files with drom-version %S:\n%!" share.share_version;
+    Printf.eprintf "  Your drom version is too old: %S\n%!" Version.version;
+    Printf.eprintf "  Minimal version to update files: %S\n%!"
+      share.share_drom_version;
+    exit 2;
+  end;
+
   let args =
     match args with
     | None -> default_args ()

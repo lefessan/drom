@@ -200,17 +200,12 @@ let load ?(args=default_args()) ?p () =
             end;
             version
   in
-  let drom_version = get_drom_version () in
-
-  if VersionCompare.compare drom_version Version.version > 0 then begin
-    Printf.eprintf "Error: you cannot update this project files:\n%!";
-    Printf.eprintf "  Your drom version is too old: %s\n%!" Version.version;
-    Printf.eprintf "  Minimal version to update files: %s\n%!" drom_version;
-  end;
+  let share_drom_version = get_drom_version () in
 
   {
     share_dir ;
     share_version ;
+    share_drom_version ;
     share_licenses = None ;
     share_projects = None ;
     share_packages = None ;
