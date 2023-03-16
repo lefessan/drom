@@ -1,5 +1,12 @@
 
-## v0.9.0
+## v0.9.1 ( 2023-??-?? )
+* Project description:
+  * New project.creation option: when created, a project remains in creation
+    mode until `drom project --finish` is called. During the creation mode,
+    all files are always regenerated from the skeleton. After creation mode,
+    only some files are updated (typically, build files, opam files, etc.)
+
+## v0.9.0 ( 2023-03-16 )
 * Split `drom-share` into another repository:
   * Use `https://github.com/OCamlPro/drom-share` by default
   * Add fields `share-repo` and `share-version` in `drom.toml` to manage the

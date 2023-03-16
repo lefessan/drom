@@ -16,6 +16,7 @@ type args =
     mutable arg_promote_skip : bool;
     mutable arg_edition : string option;
     mutable arg_min_edition : string option;
+    mutable arg_finish : bool;
 
     arg_share_version : string option;
     arg_share_repo : string option;
@@ -28,7 +29,6 @@ val update_files :
   twice:bool ->
   ?args:args ->
   ?git:bool ->
-  ?create:bool ->
   Types.project ->
   unit
 

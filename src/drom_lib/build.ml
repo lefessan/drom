@@ -104,7 +104,7 @@ let build ~args ?(setup_opam = true) ?(build_deps = true)
   let share = Share.load ~p () in
   begin
     if arg_upgrade then
-      Update.update_files share ~twice:false ~create:false p
+      Update.update_files share ~twice:false p
     else
       let hashes = Hashes.load () in
       begin
@@ -131,7 +131,7 @@ let build ~args ?(setup_opam = true) ?(build_deps = true)
               List.for_all ( (<>) new_hash ) old_hashes
         then
           if config.config_auto_upgrade <> Some false then
-            Update.update_files share ~twice:false ~create:false ~git:true p
+            Update.update_files share ~twice:false ~git:true p
           else
             Printf.eprintf
               "Warning: 'drom.toml' changed since last update,\n\

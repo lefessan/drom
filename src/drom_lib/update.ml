@@ -26,8 +26,10 @@ type args =
     mutable arg_promote_skip : bool;
     mutable arg_edition : string option;
     mutable arg_min_edition : string option;
+    mutable arg_finish : bool;
 
-    (* Not settable through standard args, only in `drom project` *)
+    (* Not settable through standard args,
+       only in `drom project` and `drom new` *)
     arg_share_version : string option;
     arg_share_repo : string option;
   }
@@ -42,27 +44,35 @@ let default_args () =
     arg_min_edition = None;
     arg_share_version = None;
     arg_share_repo = None;
+    arg_finish = false;
   }
 
 let args () =
   let args = default_args () in
   let specs =
-    [ ( [ "f"; "force" ],
-        Arg.Unit (fun () -> args.arg_force <- true),
-        EZCMD.info
-          "Force overwriting modified files (otherwise, they would be skipped)"
-      );
+    [
+      [ "f"; "force" ],
+      Arg.Unit (fun () -> args.arg_force <- true),
+      EZCMD.info
+        "Force overwriting modified files (otherwise, they would be skipped)"
+      ;
+      [ "finish" ],
+      Arg.Unit (fun () -> args.arg_finish <- true),
+      EZCMD.info
+        "Finish creation mode (mostly only build files will updated \
+         afterwards)";
+
       ( [ "skip" ],
         Arg.String
           (fun s ->
-            args.arg_skip <- (true, s) :: args.arg_skip;
-            args.arg_upgrade <- true ),
+             args.arg_skip <- (true, s) :: args.arg_skip;
+             args.arg_upgrade <- true ),
         EZCMD.info ~docv:"FILE" "Add $(docv) to skip list" );
       ( [ "unskip" ],
         Arg.String
           (fun s ->
-            args.arg_skip <- (false, s) :: args.arg_skip;
-            args.arg_upgrade <- true ),
+             args.arg_skip <- (false, s) :: args.arg_skip;
+             args.arg_upgrade <- true ),
         EZCMD.info ~docv:"FILE" "Remove $(docv) from skip list" );
       ( [ "diff" ],
         Arg.Unit (fun () -> args.arg_diff <- true),
@@ -94,7 +104,7 @@ let compute_config_hash files =
   in
   Hashes.digest_content ~file:"" ~content:to_hash ()
 
-let update_files share ?args ?(git = false) ?(create = false) p =
+let update_files share ?args ?(git = false) p =
   (*
   let force, upgrade, skip, diff, promote_skip, edition, min_edition =
     match args with
@@ -136,7 +146,12 @@ let update_files share ?args ?(git = false) ?(create = false) p =
         let p = { p with skip } in
         (p, true)
   in
-
+  let p, changed =
+    match p.project_creation, args.arg_finish with
+    | true, true ->
+        { p with project_creation = false }, true
+    | _ -> (p, changed)
+  in
   let p, changed =
     match args.arg_edition with
     | None -> (p, changed)
@@ -284,7 +299,7 @@ let update_files share ?args ?(git = false) ?(create = false) p =
           if Globals.verbose 2 then
             Printf.eprintf "Creating file %s\n%!" filename;
           write_file hashes filename content ~perm
-        ) else if create then
+        ) else if create && p.project_creation then
           raise Skip
         else if can_update ~filename ~perm hashes content then (
           Printf.eprintf "Updating file %s\n%!" filename;
@@ -334,7 +349,7 @@ let update_files share ?args ?(git = false) ?(create = false) p =
         | None -> ()
       end;
 
-      if create then
+      if p.project_creation then
         if git && not (Sys.file_exists ".git") then (
           Git.call "init" [ "-q" ];
           match config.config_github_organization with
@@ -455,8 +470,8 @@ let update_files share ?args ?(git = false) ?(create = false) p =
       Hashes.update ~git:false hashes "." [hash];
     )
 
-let update_files share ~twice ?args ?(git = false) ?(create = false) p =
-  update_files share ?args ~git ~create p ;
+let update_files share ~twice ?args ?(git = false) p =
+  update_files share ?args ~git p ;
   if twice then begin
     Printf.eprintf "Re-iterate file generation for consistency...\n%!";
     update_files share ?args ~git p

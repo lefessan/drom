@@ -73,6 +73,7 @@ and project =
     mutable generators : StringSet.t; (* sub-packages *)
     (* common fields *)
     mutable skeleton : string option;
+    project_creation : bool; (* true = in creation, false = finished *)
     project_share_repo : string option ;
     project_share_version : string option ;
     edition : string;

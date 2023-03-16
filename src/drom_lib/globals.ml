@@ -123,6 +123,7 @@ let rec dummy_project =
     packages = [];
     project_share_repo = None;
     project_share_version = None;
+    project_creation = true;
     skeleton = None;
     edition = current_ocaml_edition;
     min_edition = min_ocaml_edition;

@@ -175,7 +175,7 @@ let action ~dep ~package ~tool ~add ~remove ~version ~depname ~deptest ~depdoc
                  arg_upgrade = !upgrade ;
                }
     in
-    Update.update_files share ~twice:false ~create:false ~git:true p ~args;
+    Update.update_files share ~twice:false ~git:true p ~args;
     ()
   )
 

@@ -213,9 +213,10 @@ let create_project ~config ~name ~skeleton ~dir ~inplace ~args =
     p with
     project_share_repo = Some ( Share.share_repo_default () );
     project_share_version = Some share.share_version ;
+    project_creation = true ; (* project should be in creation mode *)
   } in
 
-  Update.update_files share ~twice:true ~create:true ~git:true ~args p;
+  Update.update_files share ~twice:true ~git:true ~args p;
   print_dir (name ^ "/") "."
 
 (* lookup for "drom.toml" and update it *)

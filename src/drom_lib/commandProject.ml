@@ -62,7 +62,7 @@ let action ~skeleton ~edit ~args =
                 args.arg_upgrade )
         }
       in
-      Update.update_files share ~twice:false ~args ~create:false ~git:true p
+      Update.update_files share ~twice:false ~args ~git:true p
 
 let cmd =
   let skeleton = ref None in

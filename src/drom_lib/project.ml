@@ -84,6 +84,8 @@ let to_files p =
       p.project_share_repo
     |> EzToml.put_string_option [ "project"; "share-version" ]
       p.project_share_version
+    |> EzToml.put_bool [ "project"; "creation" ]
+      p.project_creation
     |> EzToml.to_string
   in
   let package =
@@ -476,6 +478,9 @@ let project_of_toml ?file ?default table =
       packages
   in
 
+  let project_creation = EzToml.get_bool_default table [ project_key ; "creation" ]
+      false (* default for former projects is finished ! *)
+  in
   let profiles =
     EzToml.get_encoding_default
       (EzToml.ENCODING.stringMap profile_encoding)
@@ -592,6 +597,7 @@ let project_of_toml ?file ?default table =
       packages;
       project_share_repo;
       project_share_version;
+      project_creation;
       file;
       version;
       skeleton;
@@ -663,10 +669,15 @@ let find ?(display = true) () =
   match lookup () with
   | None -> None
   | Some (dir, path) ->
-    Unix.chdir dir;
-    if display && Globals.verbose 1 then
-      Printf.eprintf "drom: Entering directory '%s'\n%!" (Sys.getcwd ());
-    Some (of_file Globals.drom_file, path)
+      Unix.chdir dir;
+      if display && Globals.verbose 1 then
+        Printf.eprintf "drom: Entering directory '%s'\n%!" (Sys.getcwd ());
+      let p = of_file Globals.drom_file in
+      if p.project_creation then begin
+        Printf.eprintf "Warning: your project is still in creation mode.\n";
+        Printf.eprintf "  Use `drom project --finished` to close creation mode.\n%!";
+      end;
+      Some (p, path)
 
 let get () =
   match find () with
@@ -674,4 +685,5 @@ let get () =
     Error.raise
       "No project detected. Maybe you want to use 'drom project --new PROJECT' \
        instead"
-  | Some (p, inferred_dir) -> (p, inferred_dir)
+  | Some (p, inferred_dir) ->
+      (p, inferred_dir)
