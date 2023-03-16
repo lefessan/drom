@@ -84,8 +84,12 @@ let to_files p =
       p.project_share_repo
     |> EzToml.put_string_option [ "project"; "share-version" ]
       p.project_share_version
-    |> EzToml.put_bool [ "project"; "creation" ]
-      p.project_creation
+    |> (fun table ->
+        if p.project_creation then
+          EzToml.put_bool [ "project"; "creation" ]
+            p.project_creation table
+        else
+          table)
     |> EzToml.to_string
   in
   let package =
